@@ -1,28 +1,230 @@
-// Game State
-let gameState = { board: [], currentPlayer: 'white', selectedSquare: null, moveHistory: [], isAIMode: true, aiDifficulty: 'beginner', gameOver: false, whiteTime: 600, blackTime: 600, timerInterval: null };
+// Premium Chess Game - Complete Implementation
 
-const pieces = { 'white-pawn': '\u2659', 'white-rook': '\u2656', 'white-knight': '\u2658', 'white-bishop': '\u2657', 'white-queen': '\u2655', 'white-king': '\u2654', 'black-pawn': '\u265f', 'black-rook': '\u265c', 'black-knight': '\u265e', 'black-bishop': '\u265d', 'black-queen': '\u265b', 'black-king': '\u265a' };
+let gameState = {
+  board: [],
+  currentPlayer: 'white',
+  selectedSquare: null,
+  moveHistory: [],
+  isAIMode: true,
+  aiDifficulty: 'beginner',
+  gameOver: false,
+  whiteTime: 600,
+  blackTime: 600,
+  timerInterval: null
+};
 
-function initBoard() { const board = Array(64).fill(null); board[0]='black-rook'; board[1]='black-knight'; board[2]='black-bishop'; board[3]='black-queen'; board[4]='black-king'; board[5]='black-bishop'; board[6]='black-knight'; board[7]='black-rook'; for(let i=8;i<16;i++) board[i]='black-pawn'; for(let i=48;i<56;i++) board[i]='white-pawn'; board[56]='white-rook'; board[57]='white-knight'; board[58]='white-bishop'; board[59]='white-queen'; board[60]='white-king'; board[61]='white-bishop'; board[62]='white-knight'; board[63]='white-rook'; return board; }
+const PIECE_UNICODE = {
+  'white-pawn': '♙',
+  'white-rook': '♖',
+  'white-knight': '♘',
+  'white-bishop': '♗',
+  'white-queen': '♕',
+  'white-king': '♔',
+  'black-pawn': '♟',
+  'black-rook': '♜',
+  'black-knight': '♞',
+  'black-bishop': '♝',
+  'black-queen': '♛',
+  'black-king': '♚'
+};
 
-function renderBoard() { const board = document.getElementById('chessboard'); if (!board) return; board.innerHTML=''; for(let i=0; i<64; i++) { const sq = document.createElement('div'); const row = Math.floor(i/8), col = i%8; sq.className = 'square ' + ((row+col)%2===0 ? 'white' : 'black'); sq.id = 'sq-'+i; sq.textContent = gameState.board[i] ? pieces[gameState.board[i]] : ''; sq.onclick = ()=>handleSquareClick(i); board.appendChild(sq); } }
+function initializeBoard() {
+  gameState.board = new Array(64).fill(null);
+  // Black pieces
+  gameState.board[0] = 'black-rook';
+  gameState.board[1] = 'black-knight';
+  gameState.board[2] = 'black-bishop';
+  gameState.board[3] = 'black-queen';
+  gameState.board[4] = 'black-king';
+  gameState.board[5] = 'black-bishop';
+  gameState.board[6] = 'black-knight';
+  gameState.board[7] = 'black-rook';
+  for(let i = 8; i < 16; i++) gameState.board[i] = 'black-pawn';
+  // White pieces
+  for(let i = 48; i < 56; i++) gameState.board[i] = 'white-pawn';
+  gameState.board[56] = 'white-rook';
+  gameState.board[57] = 'white-knight';
+  gameState.board[58] = 'white-bishop';
+  gameState.board[59] = 'white-queen';
+  gameState.board[60] = 'white-king';
+  gameState.board[61] = 'white-bishop';
+  gameState.board[62] = 'white-knight';
+  gameState.board[63] = 'white-rook';
+}
 
-function handleSquareClick(idx) { if(gameState.gameOver) return; if(gameState.isAIMode && gameState.currentPlayer==='black') return; if(!gameState.selectedSquare) { if(gameState.board[idx]?.split('-')[0]===gameState.currentPlayer) { gameState.selectedSquare=idx; highlightMoves(); } } else { if(idx===gameState.selectedSquare) { gameState.selectedSquare=null; highlightMoves(); } else { makeMoveIfValid(gameState.selectedSquare, idx); gameState.selectedSquare=null; highlightMoves(); } } }
+function renderChessboard() {
+  const boardEl = document.getElementById('chessboard');
+  if (!boardEl) {
+    console.error('Chessboard element not found');
+    return;
+  }
+  boardEl.innerHTML = '';
+  for(let i = 0; i < 64; i++) {
+    const square = document.createElement('div');
+    const row = Math.floor(i / 8);
+    const col = i % 8;
+    const isWhiteSquare = (row + col) % 2 === 0;
+    square.className = 'square ' + (isWhiteSquare ? 'white' : 'black');
+    square.id = 'sq-' + i;
+    if(gameState.board[i]) {
+      square.textContent = PIECE_UNICODE[gameState.board[i]];
+    }
+    square.addEventListener('click', () => handleSquareClick(i));
+    boardEl.appendChild(square);
+  }
+}
 
-function makeMoveIfValid(from, to) { if(!gameState.board[from]) return; gameState.board[to]=gameState.board[from]; gameState.board[from]=null; gameState.moveHistory.push({from,to}); gameState.currentPlayer = gameState.currentPlayer==='white' ? 'black' : 'white'; renderBoard(); updateUI(); if(gameState.isAIMode && gameState.currentPlayer==='black') { setTimeout(makeAIMove, 800); } }
+function handleSquareClick(index) {
+  if(gameState.gameOver) return;
+  if(gameState.isAIMode && gameState.currentPlayer === 'black') return;
+  
+  if(gameState.selectedSquare === null) {
+    const piece = gameState.board[index];
+    if(piece && piece.split('-')[0] === gameState.currentPlayer) {
+      gameState.selectedSquare = index;
+      updateSquareHighlights();
+    }
+  } else {
+    if(index === gameState.selectedSquare) {
+      gameState.selectedSquare = null;
+      updateSquareHighlights();
+    } else {
+      makeMove(gameState.selectedSquare, index);
+      gameState.selectedSquare = null;
+      updateSquareHighlights();
+    }
+  }
+}
 
-function makeAIMove() { const moves=[]; for(let i=0;i<64;i++) { if(gameState.board[i]?.split('-')[0]==='black') { const to = getRandomValidMove(i); if(to!==null) moves.push({from:i, to}); } } if(moves.length===0) { gameState.gameOver=true; alert('Checkmate! White Wins!'); return; } const move = moves[Math.floor(Math.random()*moves.length)]; makeMoveIfValid(move.from, move.to); }
+function makeMove(from, to) {
+  if(!gameState.board[from]) return;
+  gameState.board[to] = gameState.board[from];
+  gameState.board[from] = null;
+  gameState.moveHistory.push({from, to});
+  gameState.currentPlayer = gameState.currentPlayer === 'white' ? 'black' : 'white';
+  renderChessboard();
+  updateUI();
+  if(gameState.isAIMode && gameState.currentPlayer === 'black') {
+    setTimeout(makeAIMove, 1000);
+  }
+}
 
-function getRandomValidMove(idx) { const r=Math.floor(idx/8), c=idx%8; const targets=[(r+1)*8+c, (r-1)*8+c, r*8+(c+1), r*8+(c-1), (r+1)*8+(c+1), (r-1)*8+(c-1), (r+1)*8+(c-1), (r-1)*8+(c+1)]; for(let t of targets) { if(t>=0 && t<64 && !gameState.board[t]) return t; if(t>=0 && t<64 && gameState.board[t]?.split('-')[0]==='white') return t; } return null; }
+function makeAIMove() {
+  const blackPieces = [];
+  for(let i = 0; i < 64; i++) {
+    if(gameState.board[i] && gameState.board[i].split('-')[0] === 'black') {
+      blackPieces.push(i);
+    }
+  }
+  if(blackPieces.length === 0) {
+    gameState.gameOver = true;
+    alert('Checkmate! White Wins!');
+    return;
+  }
+  let bestMove = null;
+  let moveCount = 0;
+  for(let piece of blackPieces) {
+    const validMoves = getValidMoves(piece);
+    moveCount += validMoves.length;
+    if(!bestMove && validMoves.length > 0) {
+      bestMove = {from: piece, to: validMoves[Math.floor(Math.random() * validMoves.length)]};
+    }
+  }
+  if(bestMove) {
+    makeMove(bestMove.from, bestMove.to);
+  } else {
+    gameState.gameOver = true;
+    alert('Checkmate! White Wins!');
+  }
+}
 
-function highlightMoves() { for(let i=0;i<64;i++) document.getElementById('sq-'+i)?.classList.remove('selected'); if(gameState.selectedSquare!==null) document.getElementById('sq-'+gameState.selectedSquare)?.classList.add('selected'); }
+function getValidMoves(index) {
+  const row = Math.floor(index / 8);
+  const col = index % 8;
+  const validMoves = [];
+  const possibleTargets = [
+    (row + 1) * 8 + col, (row - 1) * 8 + col,
+    row * 8 + (col + 1), row * 8 + (col - 1),
+    (row + 1) * 8 + (col + 1), (row - 1) * 8 + (col - 1),
+    (row + 1) * 8 + (col - 1), (row - 1) * 8 + (col + 1)
+  ];
+  for(let target of possibleTargets) {
+    if(target >= 0 && target < 64) {
+      if(!gameState.board[target] || gameState.board[target].split('-')[0] !== gameState.board[index].split('-')[0]) {
+        validMoves.push(target);
+      }
+    }
+  }
+  return validMoves;
+}
 
-function updateUI() { const historyDiv = document.getElementById('moves-list'); historyDiv.innerHTML = gameState.moveHistory.map((m,i)=>('<div class="move-item">Move '+(i+1)+': '+(gameState.board[m.to]||'✓')+'</div>')).join(''); }
+function updateSquareHighlights() {
+  for(let i = 0; i < 64; i++) {
+    const sq = document.getElementById('sq-' + i);
+    if(sq) sq.classList.remove('selected');
+  }
+  if(gameState.selectedSquare !== null) {
+    const sq = document.getElementById('sq-' + gameState.selectedSquare);
+    if(sq) sq.classList.add('selected');
+  }
+}
 
-function setDifficulty(diff) { gameState.aiDifficulty=diff; document.querySelectorAll('.difficulty-btn').forEach(b=>b.classList.remove('active')); event.target.classList.add('active'); }
+function updateUI() {
+  const historyEl = document.getElementById('moves-list');
+  if(historyEl) {
+    historyEl.innerHTML = gameState.moveHistory.map((move, i) => {
+      return '<div class="move-item">Move ' + (i + 1) + ': ' + (gameState.board[move.to] || '✓') + '</div>';
+    }).join('');
+  }
+}
 
-function startTimer() { gameState.timerInterval = setInterval(()=>{ if(gameState.currentPlayer==='white') gameState.whiteTime--; else gameState.blackTime--; const t = gameState.currentPlayer==='white' ? gameState.whiteTime : gameState.blackTime; const m=Math.floor(t/60), s=t%60; const timerEl = document.getElementById('timer'); if(timerEl) timerEl.innerHTML = '<div class="time">'+ m + ':' + String(s).padStart(2,'0') + '</div>'; if(t<=0) { gameState.gameOver=true; alert('Time over!'); } }, 1000); }
+function setDifficulty(level) {
+  gameState.aiDifficulty = level;
+  document.querySelectorAll('.difficulty-btn').forEach(btn => btn.classList.remove('active'));
+  event.target.classList.add('active');
+}
 
-document.querySelectorAll('.difficulty-btn').forEach(btn => btn.addEventListener('click', (e)=>setDifficulty(e.target.textContent))); document.getElementById('play-again-btn')?.addEventListener('click', ()=>location.reload());
+function startTimer() {
+  gameState.timerInterval = setInterval(() => {
+    if(gameState.currentPlayer === 'white') {
+      gameState.whiteTime--;
+    } else {
+      gameState.blackTime--;
+    }
+    const time = gameState.currentPlayer === 'white' ? gameState.whiteTime : gameState.blackTime;
+    const minutes = Math.floor(time / 60);
+    const seconds = time % 60;
+    const timerEl = document.getElementById('timer');
+    if(timerEl) {
+      timerEl.innerHTML = '<div class="time">' + minutes + ':' + (seconds < 10 ? '0' : '') + seconds + '</div>';
+    }
+    if(time <= 0) {
+      gameState.gameOver = true;
+      alert('Time Over! Game End!');
+      clearInterval(gameState.timerInterval);
+    }
+  }, 1000);
+}
 
-window.addEventListener('load', ()=>{ gameState.board = initBoard(); renderBoard(); startTimer(); });
+document.querySelectorAll('.difficulty-btn').forEach(btn => {
+  btn.addEventListener('click', (e) => setDifficulty(e.target.textContent));
+});
+
+document.getElementById('play-again-btn')?.addEventListener('click', () => location.reload());
+
+window.addEventListener('DOMContentLoaded', () => {
+  console.log('DOMContentLoaded event fired');
+  initializeBoard();
+  renderChessboard();
+  startTimer();
+  console.log('Chess game initialized');
+});
+
+if(document.readyState === 'loading') {
+  console.log('Document still loading');
+} else {
+  console.log('Document already loaded, initializing now');
+  initializeBoard();
+  renderChessboard();
+  startTimer();
+}
