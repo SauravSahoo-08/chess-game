@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Premium Chess Game</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 class="title">♔ Premium Chess ♚</h1>
+            <p class="subtitle">Experience the art of strategy</p>
+        </div>
+
+        <div class="game-modes">
+            <button class="mode-btn active" id="pvp-mode">
+                <span class="icon">👥</span>
+                <span>Player vs Player</span>
+            </button>
+            <button class="mode-btn" id="ai-mode">
+                <span class="icon">🤖</span>
+                <span>Player vs Computer</span>
+            </button>
+        </div>
+
+        <div class="game-info">
+            <div class="player-info white-player">
+                <div class="player-avatar">♔</div>
+                <div class="player-details">
+                    <h3>White</h3>
+                    <p class="turn-indicator">Your Turn</p>
+                </div>
+            </div>
+
+            <div class="timer-section">
+                <div class="timer">
+                    <span id="white-timer">10:00</span>
+                </div>
+                <div class="move-counter">
+                    <span>Move: </span><span id="move-count">0</span>
+                </div>
+                <div class="timer">
+                    <span id="black-timer">10:00</span>
+                </div>
+            </div>
+
+            <div class="player-info black-player">
+                <div class="player-avatar">♚</div>
+                <div class="player-details">
+                    <h3>Black</h3>
+                    <p class="turn-indicator">Waiting...</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="chess-board-container">
+            <div class="board-frame">
+                <div id="chessboard" class="chessboard"></div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button class="control-btn" id="new-game">
+                <span>🔄</span> New Game
+            </button>
+            <button class="control-btn" id="undo">
+                <span>↶</span> Undo
+            </button>
+            <button class="control-btn" id="hint">
+                <span>💡</span> Hint
+            </button>
+        </div>
+
+        <div class="moves-history">
+            <h3>Move History</h3>
+            <div id="moves-list" class="moves-list"></div>
+        </div>
+    </div>
+
+    <div class="modal" id="game-over-modal">
+        <div class="modal-content">
+            <h2 id="game-result">Checkmate!</h2>
+            <p id="winner-text">White Wins!</p>
+            <button class="modal-btn" id="play-again">Play Again</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
