@@ -1,4 +1,4 @@
-// Premium Chess Game - Enhanced Implementation with Proper Rules
+// Premium Chess Game - Fixed Black/White Piece Colors
 
 let gameState = {
   board: [],
@@ -42,7 +42,11 @@ function renderChessboard() {
     const row = Math.floor(i / 8), col = i % 8;
     square.className = 'square ' + ((row + col) % 2 === 0 ? 'white' : 'black');
     square.id = 'sq-' + i;
-    if(gameState.board[i]) square.textContent = PIECE_UNICODE[gameState.board[i]];
+    if(gameState.board[i]) {
+      square.textContent = PIECE_UNICODE[gameState.board[i]];
+      const pieceColor = gameState.board[i].split('-')[0];
+      square.classList.add(pieceColor + '-piece');
+    }
     square.addEventListener('click', () => handleSquareClick(i));
     boardEl.appendChild(square);
   }
@@ -72,7 +76,12 @@ function getValidMoves(index) {
         if(!gameState.board[forwardTwo]) moves.push(forwardTwo);
       }
     }
-    for(let dc of [-1,1]) addIfValid(row+dir, col+dc);
+    for(let dc of [-1,1]) {
+      const captureTarget = (row + dir) * 8 + (col + dc);
+      if(captureTarget >= 0 && captureTarget < 64 && gameState.board[captureTarget]) {
+        if(gameState.board[captureTarget].split('-')[0] !== color) moves.push(captureTarget);
+      }
+    }
   } else if(type === 'knight') {
     for(let [dr,dc] of [[2,1],[2,-1],[-2,1],[-2,-1],[1,2],[1,-2],[-1,2],[-1,-2]]) addIfValid(row+dr, col+dc);
   } else if(type === 'bishop' || type === 'queen' || type === 'rook') {
