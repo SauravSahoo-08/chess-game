@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Premium Chess Game</title>
+    <title>Premium Chess - Professional Edition</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1 class="title">♔ Premium Chess ♚</h1>
-            <p class="subtitle">Experience the art of strategy</p>
+            <h1 class="title">♔ Premium Chess Game ♚</h1>
+            <p class="subtitle">Professional Edition - Better than Chess.com</p>
         </div>
 
         <div class="game-modes">
@@ -20,8 +20,15 @@
             </button>
             <button class="mode-btn" id="ai-mode">
                 <span class="icon">🤖</span>
-                <span>Player vs Computer</span>
+                <span>Player vs AI</span>
             </button>
+        </div>
+
+        <div class="ai-difficulty" id="ai-difficulty" style="display: none;">
+            <label>AI Difficulty:</label>
+            <button class="difficulty-btn active" data-level="easy">🟢 Beginner</button>
+            <button class="difficulty-btn" data-level="medium">🟡 Intermediate</button>
+            <button class="difficulty-btn" data-level="hard">🔴 God Mode</button>
         </div>
 
         <div class="game-info">
@@ -29,18 +36,21 @@
                 <div class="player-avatar">♔</div>
                 <div class="player-details">
                     <h3>White</h3>
-                    <p class="turn-indicator">Your Turn</p>
+                    <p class="turn-indicator" id="white-turn">Your Turn</p>
+                    <div class="score" id="white-score">Score: 0</div>
                 </div>
             </div>
 
             <div class="timer-section">
-                <div class="timer">
+                <div class="timer active" id="white-timer-display">
+                    <span>⏱️</span>
                     <span id="white-timer">10:00</span>
                 </div>
                 <div class="move-counter">
                     <span>Move: </span><span id="move-count">0</span>
                 </div>
-                <div class="timer">
+                <div class="timer" id="black-timer-display">
+                    <span>⏱️</span>
                     <span id="black-timer">10:00</span>
                 </div>
             </div>
@@ -49,7 +59,8 @@
                 <div class="player-avatar">♚</div>
                 <div class="player-details">
                     <h3>Black</h3>
-                    <p class="turn-indicator">Waiting...</p>
+                    <p class="turn-indicator" id="black-turn">Waiting...</p>
+                    <div class="score" id="black-score">Score: 0</div>
                 </div>
             </div>
         </div>
@@ -65,15 +76,18 @@
                 <span>🔄</span> New Game
             </button>
             <button class="control-btn" id="undo">
-                <span>↶</span> Undo
+                <span>↶</span> Undo Move
             </button>
             <button class="control-btn" id="hint">
-                <span>💡</span> Hint
+                <span>💡</span> Show Hint
+            </button>
+            <button class="control-btn" id="resign">
+                <span>🏳️</span> Resign
             </button>
         </div>
 
         <div class="moves-history">
-            <h3>Move History</h3>
+            <h3>📜 Move History</h3>
             <div id="moves-list" class="moves-list"></div>
         </div>
     </div>
@@ -82,6 +96,7 @@
         <div class="modal-content">
             <h2 id="game-result">Checkmate!</h2>
             <p id="winner-text">White Wins!</p>
+            <p id="game-stats"></p>
             <button class="modal-btn" id="play-again">Play Again</button>
         </div>
     </div>
